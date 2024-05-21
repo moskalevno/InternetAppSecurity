@@ -1,0 +1,12 @@
+.request-reset-container {
+    position: fixed; /* или absolute, в зависимости от вашей структуры */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10; /* Убедитесь, что это значение выше, чем у других элементов */
+    background: white; /* или любой другой видимый цвет */
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
