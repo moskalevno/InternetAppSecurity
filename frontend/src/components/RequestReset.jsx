@@ -8,7 +8,6 @@ export default function RequestReset() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Здесь отправляем запрос на ваш эндпоинт сервера для сброса пароля
       const response = await axios.post('/users/requestReset', { email });
       // В случае успеха обновляем сообщение для пользователя
       setMessage('If an account with that email exists, we sent a link to reset your password.');
@@ -21,7 +20,6 @@ export default function RequestReset() {
   return (
     <div className="request-reset-container">
       <h2>Reset Your Password</h2>
-      {console.log("AAAAAAAAAAAAA")}
       <form onSubmit={handleSubmit}>
         <input
           type="email"
