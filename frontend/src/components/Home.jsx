@@ -64,6 +64,74 @@ const [viewport, setViewport] = useState({
 
 const [countriesBordersGeoJSON, setCountriesBordersGeoJSON] = useState(null);
 
+////////////////////////////////////DELETING////////////////////////////////////////////////////////////////////
+const handleDeleteReview = async (pinId, reviewId) => {
+  try {
+    const response = await axios.delete(`http://localhost:8800/api/reviews/${pinId}/delete_review/${reviewId}`, {
+      data: { userId: currentUser } // убедитесь, что currentUser соответствует текущему идентификатору пользователя
+    });
+
+    if (response.status === 200) {
+      // Обновляем состояние пинов после удаления отзыва
+      setPins(prevPins => prevPins.map(pin => {
+        if (pin._id === pinId) {
+          // Обновляем отзывы для этого пина, исключая удаленный
+          const updatedReviews = pin.reviews.filter(review => review._id !== reviewId);
+          // Возвращаем обновленный пин
+          return { ...pin, reviews: updatedReviews };
+        }
+        return pin;
+      }));
+      console.log("Отзыв удален");
+       // Сбрасываем состояние редактируемого отзыва, если это был удаленный отзыв
+       if (editingReview && editingReview._id === reviewId) {
+        setEditingReview(null);
+       }
+    }
+  } catch (error) {
+    console.error('Ошибка при удалении отзыва: ', error.response?.data || error.message);
+  }
+};
+//1 отзыв (создателя)
+  const deletePin = async (pinId) => {
+    try {
+      const response = await axios.delete(`http://localhost:8800/api/pins/${pinId}`, {
+        data: { userId: currentUser }
+      });
+      if (response.status === 200) {
+        setPins(pins.filter(pin => pin._id !== pinId));
+        console.log('Пин и отзыв успешно удалены');
+        // Обновите состояние или выполните действия после удаления, например:
+        // setPins(pins.filter(pin => pin._id !== pinId));
+      }
+    } catch (error) {
+      console.error('Ошибка при удалении пина:', error.response.data);
+    }
+  };
+//Удаление отзыва создателем пина, когда есть другие отзывы
+const deleteFirstReview = async (pinId) => {
+  try {
+    const response = await axios.delete(`http://localhost:8800/api/pins/${pinId}/delete_desc`, {
+      data: { userId: currentUser }
+    });
+
+    if (response.status === 200) {
+      // Предполагаем, что сервер возвращает обновленный пин с новым описанием
+      const updatedPin = response.data;
+
+      // Обновляем список пинов в состоянии
+      setPins(pins.map(pin => pin._id === pinId ? updatedPin : pin));
+
+      console.log('Описание пина удалено и заменено на первый отзыв из массива reviews');
+    }
+  } catch (error) {
+    console.error('Ошибка при удалении описания пина:', error.response?.data || error.message);
+  }
+};
+////////////////////////////////////DELETING////////////////////////////////////////////////////////////////////
+
+
+
 function AvgRating(pin){
   // Начинаем с рейтинга и отзыва основного пина
   let totalRating = pin.rating;
