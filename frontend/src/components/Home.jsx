@@ -20,27 +20,203 @@ import ResetPassword from './ResetPassword';
 const MAPBOX_TOKEN = 'pk.eyJ1IjoibWFrczM1NDkiLCJhIjoiY2xmc3U2bXU4MDl2ejNqb2JzeTFpazV5aiJ9.hK8UcLIKZyNtJlpBj_V06g'; // Set your mapbox token here
 
 function Home() {
-  
+  const myStorage = window.localStorage
+
+  const [currentUser, setCurrentUser] = useState(myStorage.getItem("user"))
+
+  const handleLogout = () => {
+    myStorage.removeItem("user")
+    setCurrentUser(null)
+  }
+
+const [editingReview, setEditingReview] = useState(null);
+const [showRecover, setShowRecover] = useState(false);
+
+
+const [pins, setPins] = useState([]);
+const [currentPlaceId,setCurrentPlaceId] = useState(null)
+const [newPlace,setNewPlace] = useState(null)
+const [isCountryInputVisible, setIsCountryInputVisible] = useState(false);
+const [countryInput, setCountryInput] = useState("");
+const [title,setTitle] = useState(null)
+const [desc,setDesc] = useState(null)
+const [rating,setRating] = useState(0)
+const [showRegister,setShowRegister] = useState(false)
+const [showLogin,setShowLogin] = useState(false)
+/////////// маршруты
+
+/////A to B
+const [pointA,setPointA] = useState(null)
+const [pointB,setPointB] = useState(null)
+const [isRouteMode, setIsRouteMode] = useState(false);
+//////////
+const [topRatedPins, setTopRatedPins] = useState([]);
+const [route, setRoute] = useState(null);
+const [newReviewText,setNewReviewText] = useState("")
+const [newReviewRating, setNewReviewRating] = useState(0);
+const [showPopup, setShowPopup] = useState(true);
+///////
 const [viewport, setViewport] = useState({
   latitude: 47.040182,
   longitude: 17.071727,
   zoom: 4,
 });
-const [newPlace,setNewPlace] = useState(null)
-const [pins, setPins] = useState([]);
+
 const [countriesBordersGeoJSON, setCountriesBordersGeoJSON] = useState(null);
 
-  const handleAddClick = (e) => {
-    const [lng, lat] = e.lngLat.toArray()
-    setNewPlace ({
-      lat:lat,
-      lng:lng,
-    })
+function AvgRating(pin){
+  // Начинаем с рейтинга и отзыва основного пина
+  let totalRating = pin.rating;
+  let totalReviews = 1; // Потому что у нас уже есть основной отзыв
+
+  // Добавляем рейтинги от дополнительных отзывов
+  if (pin.reviews && pin.reviews.length > 0) {
+    pin.reviews.forEach(review => {
+      totalRating += review.rating;
+      totalReviews += 1;
+    });
   }
+  // Возвращаем средний рейтинг
+  let res = Math.floor((totalRating - totalRating % totalReviews)  / totalReviews)
+  //console.log("AVG RATING",res);
+  return  res//totalRating  / totalReviews;
+}
+
+useEffect(() => {
+  fetch('/custom.geo.json')
+    .then((response) => response.json())
+    .then((data) => setCountriesBordersGeoJSON(data))
+    .catch((error) => console.error('Error loading GeoJSON:', error));
+}, []);
 
 
-    ////////////////////////////BUTTON FOR A TO B ROUTE//////////////////////////////////////////////////////////////////////////////////////////////////////////
-  const [showPopup, setShowPopup] = React.useState(true);
+useEffect(() => {
+  // Пересчитываем topRatedPins при изменении списка пинов
+  recalculateTopRatedPins();
+}, [pins]);
+  
+  // Пересчитываем маршрут при изменении topRatedPins или точек A и B
+  useEffect(() => {
+    if (pointA && pointB) {
+      buildCustomRoute(pointA, pointB, topRatedPins);
+    }
+  }, [pointA, pointB, topRatedPins]);
+
+  const getCountryBounds = async (lat, lng) => {
+    const url = `https://api.mapbox.com/v4/mapbox.country-boundaries-v1/tilequery/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}`;
+    try {
+      const response = await axios.get(url);
+      const data = response.data;
+      if (data && data.features && data.features.length > 0) {
+        // Обработка данных о границах страны
+        return data.features[0].properties;
+      } else {
+        throw new Error('Country boundaries not found');
+      }
+    } catch (error) {
+      console.error('Error fetching country boundaries:', error);
+      return undefined;
+    }
+  };
+
+
+  // Функция для построения маршрута
+  const buildRoute = async () => {
+    console.log('Building route...');
+    // Ограничим количество точек для маршрута, чтобы избежать превышения ограничений API.
+    const MAX_ROUTE_POINTS = 4; // или другое значение в зависимости от ограничений Mapbox API
+    const eligiblePins = topRatedPins.filter(pin => AvgRating(pin) >= 4);
+    const sortedPins = [...eligiblePins].sort((a, b) => AvgRating(b) - AvgRating(a));
+    //const sortedPins = [...topRatedPins].sort((a, b) => b.rating - a.rating);
+    const topPins = sortedPins.slice(0, MAX_ROUTE_POINTS);
+  
+    // Формируем строку координат для Mapbox API из первых 10 высокооцененных точек
+    const coordinates = topPins.map(pin => `${pin.long},${pin.lat}`).join(';');
+    const mapboxRequestUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?access_token=${MAPBOX_TOKEN}&geometries=geojson`;
+  
+    try {
+      const response = await axios.get(mapboxRequestUrl);
+      const data = response.data;
+      
+      console.log(data);
+      // Проверяем, что полученный ответ содержит маршруты
+      if (data.routes && data.routes.length) {
+        const route = data.routes[0]; // Получаем первый маршрут из ответа
+        const coordinates = route.geometry.coordinates; // Получаем координаты маршрута
+        console.log(coordinates);
+        const line = lineString(coordinates); // Создаём линию из координат
+        const smoothedLine = bezierSpline(line);
+      // Установка полученного маршрута
+        setRoute(smoothedLine);
+        console.log('Route set:', data.routes[0]);
+        console.log('Coords:', );
+
+      } else {
+        // Обработка случаев, когда маршрут не найден или ошибка в данных
+        console.error('No routes found in the Mapbox response.');
+        setRoute(null);
+      }
+    } catch (err) {
+      console.error('Ошибка при запросе к Mapbox API:', err);
+      setRoute(null);
+    }
+    
+  };
+  
+  // Функция для построения маршрута внутри страны
+  const buildRouteWithinCountry = async (countryName) => {
+    const MAX_ROUTE_POINTS = 10;
+    // Фильтрация пинов внутри заданной страны и с оценкой 4 и выше
+    const withinCountryPins = pins.filter(pin => 
+      pin.countryName === countryName && AvgRating(pin) >= 4);
+  // Сортировка пинов по среднему рейтингу и взятие первых MAX_ROUTE_POINTS
+  const sortedPins = withinCountryPins.sort((a, b) => 
+      AvgRating(b) - AvgRating(a)).slice(0, MAX_ROUTE_POINTS);
+    // Получение координат для построения маршрута
+    const coordinates = sortedPins.map(pin => `${pin.long},${pin.lat}`).join(';');
+    console.log("COORDS",coordinates);
+    const mapboxRequestUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?access_token=${MAPBOX_TOKEN}&geometries=geojson`;
+    try {
+      const response = await axios.get(mapboxRequestUrl);
+      console.log("RESPONSE", response);
+      const data = response.data;
+      if (data.routes && data.routes.length) {
+        const route = data.routes[0];
+        const coordinates = route.geometry.coordinates;
+        console.log(coordinates);
+        const line = lineString(coordinates);
+        const smoothedLine = bezierSpline(line);
+        setRoute(smoothedLine);
+        console.log('Route set:', data.routes[0]);
+      } else {
+        console.error('No routes found in the Mapbox response.');
+        setRoute(null);
+      }
+    } catch (err) {
+      console.error('Error requesting Mapbox API:', err);
+      setRoute(null);
+    }
+  };
+
+// Функция для геокодирования названия места
+const geocodeLocation = async (locationName) => {
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(locationName)}.json?access_token=${MAPBOX_TOKEN}`;
+  try {
+    const response = await axios.get(url);
+    const data = response.data;
+    if (data.features && data.features.length > 0) {
+      // Возвращаем первые найденные координаты
+      return data.features[0].geometry.coordinates;
+    } else {
+      throw new Error('Location not found');
+    }
+  } catch (error) {
+    console.error('Error geocoding location:', error);
+    return null;
+  }
+};
+
+
   return (
     <div className='Home'>
       <Map
@@ -125,7 +301,7 @@ const [countriesBordersGeoJSON, setCountriesBordersGeoJSON] = useState(null);
         {Array(Math.round(AvgRating(p))).fill(<Star className='star'></Star>)}
 
       </div>
-
+            
   </div>
   </Popup>
         
@@ -133,7 +309,25 @@ const [countriesBordersGeoJSON, setCountriesBordersGeoJSON] = useState(null);
         </>
         ))}
 
-      </Map>
+<button className="button buttonRoute" onClick={buildRoute}>
+              Build Top Rated Route
+          </button>
+            {currentUser ? (
+              <button className="button logout" onClick={handleLogout}>LogOut</button>
+            ) : (
+              <>
+                <button className="button login" onClick={() => setShowLogin(true)}>LogIn</button>
+                <button className="button register" onClick={() => setShowRegister(true)}>Register</button>
+              </>
+)}
+
+    {showRegister && <Register setShowRegister = {setShowRegister}/>}
+        {showRecover ? 
+        (<RequestReset setShowRecover={setShowRecover} />) 
+        :
+        (showLogin && <Login setShowRecover={setShowRecover} setShowLogin={setShowLogin} myStorage={myStorage} setCurrentUser={setCurrentUser}/>)
+        }
+</Map>
     </div>
     );
   
