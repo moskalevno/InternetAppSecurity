@@ -217,6 +217,80 @@ const geocodeLocation = async (locationName) => {
 };
 
 
+////A TO B///////////////////////
+const selectPoint = (e) => {
+  if (!isRouteMode) return;
+  const [lng, lat] = e.lngLat.toArray();
+  if (!pointA) {
+    setPointA({ lat, lng });
+    console.log('Point A is set: ', { lat, lng }); // Добавлено для отладки
+  } else {
+    setPointB({ lat, lng });
+    
+    console.log('Point B is set: ', { lat, lng }); // Добавлено для отладки
+    // Вызов функции buildCustomRoute должен быть выполнен здесь, после установки pointB
+    buildCustomRoute(pointA, { lat, lng }, topRatedPins);
+    setPointA(null); // Очищаем точку A для следующего использования
+    setPointB(null); // Очищаем точку B тоже
+    setIsRouteMode(false); // Завершаем режим построения маршрута
+  }
+};
+
+  // Функция для поиска ближайшего высокооцененного места
+const findNearestTopRatedPlace = (pointA,pointB,topRatedPins) => {
+  if (!Array.isArray(topRatedPins) || topRatedPins.length === 0) {
+    console.error('No top rated pins provided');
+    return null;
+  }
+  const line = turf.lineString([[pointA.lng, pointA.lat], [pointB.lng, pointB.lat]]);
+  let nearestPlace = null;
+  let nearestDistance = Infinity;
+
+  topRatedPins.forEach(pin => {
+  if (pin && typeof pin.rating === 'number' && AvgRating(pin) >= 4) { // Убедитесь, что место имеет рейтинг 4 и выше
+    const placePoint = turf.point([pin.long, pin.lat]);
+    const distance = turf.pointToLineDistance(placePoint, line);
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestPlace = pin;
+      console.log("top",nearestPlace);
+    }
+  }
+});
+  return nearestDistance <= 10 ? nearestPlace : null
+};
+
+// Функция построения пользовательского маршрута
+const buildCustomRoute = async (startPoint, endPoint, topRatedPins) => {
+  let waypoints = '';
+  const nearestTopRatedPlace = findNearestTopRatedPlace(startPoint, endPoint, topRatedPins);
+  if (nearestTopRatedPlace) {
+    waypoints = `;${nearestTopRatedPlace.long},${nearestTopRatedPlace.lat}`;
+  }
+  const coordinates = `${startPoint.lng},${startPoint.lat}${waypoints};${endPoint.lng},${endPoint.lat}`;
+  const mapboxRequestUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?access_token=${MAPBOX_TOKEN}&geometries=geojson`;
+  
+  try {
+    const response = await axios.get(mapboxRequestUrl);
+    const data = response.data;
+    if (data.routes && data.routes.length) {
+      const route = data.routes[0];
+      const coordinates = route.geometry.coordinates;
+      const line = lineString(coordinates);
+      const smoothedLine = bezierSpline(line);
+      setRoute(smoothedLine); // Обновление состояния маршрута
+      console.log('Route set:', data.routes[0]);
+    } else {
+      console.error('No routes found in the mapbox response');
+      setRoute(null);
+    }
+  } catch (err) {
+    console.error('Error requesting mapbox API', err);
+    setRoute(null);
+  }
+};
+  //// A TO B////////////////////
+
   return (
     <div className='Home'>
       <Map
