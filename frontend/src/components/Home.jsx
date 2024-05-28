@@ -456,34 +456,55 @@ const buildCustomRoute = async (startPoint, endPoint, topRatedPins) => {
 };
   //// A TO B////////////////////
 
-  return (
-    <div className='Home'>
-      <Map
-        initialViewState={{...viewport}}
-        style={{width: "100vw", height: "100vh"}}
-        //mapbox://styles/mapbox/streets-v12
-        mapStyle="mapbox://styles/safak/cknndpyfq268f17p53nmpwira"
-        mapboxAccessToken={MAPBOX_TOKEN}
-        onViewportChange={(viewport) => setViewport(viewport)}
-        onDblClick = {handleAddClick}
-        transitionDuration = "200"
-      >
-
-      {pins.map(p => (
-  <>
-    <Marker
-        latitude={p.lat}
-        longitude={p.long}
-        
-        offsetLeft={-viewport.zoom * 5}
-        offsetTop={-viewport.zoom * 10}
-        anchor="bottom"
+return (
+  <div className='Home'>
+    <Map
+      initialViewState={{...viewport}}
+      style={{width: "100vw", height: "100vh"}}
+      //mapbox://styles/mapbox/streets-v12
+      mapStyle="mapbox://styles/safak/cknndpyfq268f17p53nmpwira"
+      mapboxAccessToken={MAPBOX_TOKEN}
+      onViewportChange={(viewport) => setViewport(viewport)}
+      onDblClick = {handleAddClick}
+      onClick={isRouteMode ? selectPoint : null}
+      transitionDuration = "200"
     >
-        <Room style={{fontSize: (10 * viewport.zoom), color: p.username === currentUser ? "tomato" : userHasReviewedPin(p, currentUser) ? "teal" : "slateblue", cursor: "pointer"}}
-        onClick = {() => handleMarkerClick(p._id, p.lat, p.long, p.countryName)}
-        />
+
+    {pins.map(p => (
+    <>
+    <Marker
+      latitude={p.lat}
+      longitude={p.long}
+      offsetLeft={-viewport.zoom * 5}
+      offsetTop={-viewport.zoom * 10}
+      anchor="bottom"
+    >
+      <Room style={{fontSize: (10 * viewport.zoom), color: p.username === currentUser ? "tomato" : userHasReviewedPin(p, currentUser) ? "teal" : "slateblue", cursor: "pointer"}}
+      onClick = {() => handleMarkerClick(p._id, p.lat, p.long, p.countryName)}
+    />
     </Marker>
 
+
+    {
+      // Отображение построенного маршрута
+      route && (
+        <Source id="route" type="geojson" data={route.geometry}>
+          <Layer
+            id="route"
+            type="line"
+            source="route"
+            layout={{
+              'line-join': 'round',
+              'line-cap': 'round'
+            }}
+            paint={{
+              'line-color': '#603aeb',
+              'line-width': 3
+            }}
+          />
+        </Source>
+      )
+    }
     {countriesBordersGeoJSON && (
       <Source id="countries-borders" type="geojson" data={countriesBordersGeoJSON}>
         <Layer
@@ -495,15 +516,15 @@ const buildCustomRoute = async (startPoint, endPoint, topRatedPins) => {
           }}
         />
       </Source>
-    )}
-
+      )}
+      {p._id === currentPlaceId &&
     <Popup
-      latitude={p.lat}
-      longitude={p.long}
-      closeButton={true}
-      closeOnClick={false}
-      onClose={() => setCurrentPlaceId(null)}
-      anchor="left"
+            latitude={p.lat}
+            longitude={p.long}
+            closeButton={true}
+            closeOnClick={false}
+            onClose={() => setCurrentPlaceId(null)}
+            anchor="left"
     >
     <div className='card'>
       <label>Place</label>
@@ -513,7 +534,14 @@ const buildCustomRoute = async (startPoint, endPoint, topRatedPins) => {
       <label>Rating</label>
       <div className='stars'>
         {Array(p.rating).fill(<Star className='star'></Star>)}
+        
       </div>
+      {currentUser === p.username && !p.reviews.length && (
+        <button className='button buttonRoute buttonReview' onClick={() => deletePin(p._id)}>Delete Pin</button>
+      )}
+      {currentUser === p.username && p.reviews.length >= 1 && (
+        <button className='button buttonRoute buttonReview' onClick={() => deleteFirstReview(p._id)}>Delte my first review</button>
+      )}
       <label>Information</label>
       <span className='username'>Created by <b>{p.username}</b> </span>
       <span className='date'>{format(p.createdAt)}</span>
@@ -521,54 +549,224 @@ const buildCustomRoute = async (startPoint, endPoint, topRatedPins) => {
         {p.reviews.map(review => (
           <div key={review._id} className="review">
             <label>----------------------------------<br></br> </label>
-            {/* <label>Review</label>
-            <p className='desc'>{p.desc}</p> */}
-
             <label>Review</label>
             <p className='desc'>{review.text}</p>
             <label>Information<br></br></label>
-            
             <span className='username'>Created by <b>{review.username}</b> </span>
             <span className='date'><br></br>{format(review.createdAt)}</span>
             <div className='stars'>
               {Array(review.rating).fill(<Star className="star" />)}
-              
             </div>
+            {review.username === currentUser && (
+              <button className='button buttonRoute buttonReview' onClick={() => handleDeleteReview(p._id, review._id, p.username === currentUser)}>Delete</button>
+            )}
           </div>
         ))}
         <span className='avg'><b>Average Rating</b><br></br></span>
-        {Array(Math.round(AvgRating(p))).fill(<Star className='star'></Star>)}
-
+              {Array(Math.round(AvgRating(p))).fill(<Star className='star'></Star>)}
       </div>
-            
-  </div>
-  </Popup>
-        
-        
-        </>
-        ))}
 
-<button className="button buttonRoute" onClick={buildRoute}>
-              Build Top Rated Route
+      {currentPlaceId && currentUser && currentUser !== p.username && !hasUserReviewedPin(p, currentUser) && (
+        <div className="addReview">
+          {/* Форма для добавления нового отзыва */}
+          <input
+            placeholder="Share your opinion about this place"
+            value={newReviewText}
+            onChange={(e) => setNewReviewText(e.target.value)}
+          />
+          <select
+            value={newReviewRating}
+            onChange={(e) => setNewReviewRating(Number(e.target.value))}
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <button
+            className='button buttonRoute buttonReview'
+            onClick={() => handleAddReview(currentPlaceId)}
+          >
+            Add Review
           </button>
-            {currentUser ? (
-              <button className="button logout" onClick={handleLogout}>LogOut</button>
-            ) : (
-              <>
-                <button className="button login" onClick={() => setShowLogin(true)}>LogIn</button>
-                <button className="button register" onClick={() => setShowRegister(true)}>Register</button>
-              </>
-)}
+        </div>
+      )}
 
-    {showRegister && <Register setShowRegister = {setShowRegister}/>}
-        {showRecover ? 
-        (<RequestReset setShowRecover={setShowRecover} />) 
-        :
-        (showLogin && <Login setShowRecover={setShowRecover} setShowLogin={setShowLogin} myStorage={myStorage} setCurrentUser={setCurrentUser}/>)
-        }
-</Map>
+      {/* Внутри отзывов, кнопки для редактирования и удаления */}
+      {p.reviews.map((review) => (
+        review.username === currentUser && (
+          <div key={review._id} className="review">
+            <button className='button buttonRoute buttonReview' onClick={() => startEditingReview(p._id, review)}>Edit Review</button>
+          </div>
+        )
+      ))}
+
+      {currentUser === p.username && (
+        <button className='button buttonRoute buttonReview' onClick={() => startEditingPinReview(p)}>Edit Review</button>
+      )}
+
+      {/* // При рендере формы для редактирования: */}
+      {editingReview && editingReview.isEditingDesc && (
+        <div className="editReview">
+          <form className='accumForm'>
+          {/* Форма редактирования */}
+          <input
+            value={newReviewText}
+            onChange={(e) => setNewReviewText(e.target.value)}
+          />
+          <select
+            value={newReviewRating}
+            onChange={(e) => setNewReviewRating(Number(e.target.value))}
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            {/* options */}
+          </select>
+          <button type="button" className='button buttonRoute buttonReview' onClick={() => handleUpdatePinReview(editingReview._id)}>Update Review</button>
+          </form>
+        </div>
+      )}
+
+      {editingReview && !editingReview.isEditingDesc && currentUser !== p.username &&(
+        // Если в редактировании - покажем форму с данными редактируемого отзыва
+        <div className="addReview">
+          <form className='accumForm'>
+            <input
+              placeholder="Share your opinion about this place"
+              value={newReviewText} // Значение должно быть из состояния newReviewText
+              onChange={(e) => setNewReviewText(e.target.value)}
+            />
+            <select
+              value={newReviewRating} // Значение должно быть из состояния newReviewRating
+              onChange={(e) => setNewReviewRating(Number(e.target.value))}
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <button
+              type="button"
+              className='button buttonRoute buttonReview' 
+              onClick={() => handleReviewSubmit()} // Убрал параметры, так как они не используются в handleReviewSubmit
+            >
+              Update Review
+            </button>
+          </form>
+        </div>
+      )}
+        <button className='button buttonRoute' onClick={() => buildRouteWithinCountry(p.countryName)}>Build Route In This Country</button>
+      </div>
+      </Popup>
+      }
+      </>
+      ))}
+
+      {newPlace && (
+        <Popup
+        latitude={newPlace.lat}
+        longitude={newPlace.lng}
+        closeButton={true}
+        closeOnClick={false}
+        onClose={() => setNewPlace(null)}
+        anchor="left"
+        >
+        <div>
+          <form onSubmit ={handleSubmit}>
+            <label>Title</label>
+            <input placeholder='Enter a title' onChange={(e) => setTitle(e.target.value)}/>
+            <label>Review</label>
+            <textarea placeholder='Share your opinion about this place' onChange={(e) => setDesc(e.target.value)}/>
+            <label>Rating</label>
+            <select onChange={(e) => setRating(Number(e.target.value))}>
+              <option value='1'>1</option>
+              <option value='2'>2</option>
+              <option value='3'>3</option>
+              <option value='4'>4</option>
+              <option value='5'>5</option>
+            </select>
+            <button className='submitButton' type='submit'>Add Pin</button>
+          </form>
+        </div>
+      </Popup>
+      )}
+
+    <div className="buttons">
+      {/*////////////////////////////////////////////////////////////////////////////////////*/}
+        <div className="button-container">
+        <button className="button ButtonPoints" onClick={handleShowCustomRouteForm}>
+          Build Route Between Two Points
+        </button>
+        
+        {showCustomRouteForm && (
+          <form className="custom-route-form" onSubmit={handleCustomRouteSubmit}>
+            <input
+              type="text"
+              placeholder="Enter start point (e.g., 'Cairo, Egypt')"
+              value={startPoint}
+              onChange={(e) => setStartPoint(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Enter end point (e.g., 'Tokyo, Japan')"
+              value={endPoint}
+              onChange={(e) => setEndPoint(e.target.value)}
+            />
+            <button className='button PointsRoute' type="submit">Build Route</button>
+          </form>
+        )}
+      </div>
+      {/*////////////////////////////////////////////////////////////////////////////////////*/}
+
+      <div className="button-container">
+          <button className="button countryRoute" onClick={handleShowCountryInput}>
+            Build Route By Country
+          </button>
+
+          <button className="button countryRoute" onClick={() => setIsRouteMode(!isRouteMode)}>
+              {isRouteMode ? 'Cancel Route' : 'Build Custom Route'}
+          </button>
+
+          {isCountryInputVisible &&  (
+            <form className="form-popup" onSubmit={handleCountrySubmit}>
+              <input className='popup-input'
+                type="text"
+                value={countryInput}
+                onChange={(e) => setCountryInput(e.target.value)}
+                placeholder="Enter country name"
+              />
+              <button className="button countryRoute input-button" type="submit">Build Route</button>
+            </form>
+          )}
+      </div>
+
+        <button className="button buttonRoute" onClick={buildRoute}>
+            Build Top Rated Route
+        </button>
+          {currentUser ? (
+            <button className="button logout" onClick={handleLogout}>LogOut</button>
+          ) : (
+            <>
+              <button className="button login" onClick={() => setShowLogin(true)}>LogIn</button>
+              <button className="button register" onClick={() => setShowRegister(true)}>Register</button>
+            </>
+          )}
     </div>
-    );
-  
+    {showRegister && <Register setShowRegister = {setShowRegister}/>}
+
+    {showRecover ? 
+    (<RequestReset setShowRecover={setShowRecover} />) 
+    :
+    (showLogin && <Login setShowRecover={setShowRecover} setShowLogin={setShowLogin} myStorage={myStorage} setCurrentUser={setCurrentUser}/>)
+    }
+    </Map>
+  </div>
+  );
+
 }
 export default Home
