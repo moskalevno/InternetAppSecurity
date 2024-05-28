@@ -130,6 +130,103 @@ const deleteFirstReview = async (pinId) => {
 };
 ////////////////////////////////////DELETING////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////UPDATE//////////////////////////////////////////////////////////////////////////
+
+// Это функция вызывается, когда пользователь хочет редактировать отзыв
+
+
+const handleReviewSubmit = async () => {
+  
+  if (editingReview) {
+    // Если редактируется отзыв, вызываем функцию обновления
+    await handleUpdateReview(
+      editingReview.pinId,
+      editingReview._id,
+      newReviewText,
+      newReviewRating
+    );
+  } else {
+    // Если создаётся новый отзыв, вызываем функцию добавления
+    await handleAddReview(currentPlaceId, newReviewText, newReviewRating);
+  }
+  // Очистка формы
+  setNewReviewText('');
+  setNewReviewRating(0);
+  setEditingReview(null); // Выходим из режима редактирования
+};
+
+
+const handleUpdateReview = async (pinId, reviewId, text, rating) => {
+  try {
+    const res = await axios.put(`http://localhost:8800/api/reviews/${pinId}/update_review/${reviewId}`, {
+      text: text,
+      rating: rating,
+      userId: currentUser // Используем идентификатор текущего пользователя
+    });
+
+    if (res.status === 200) {
+      setPins(prevPins => prevPins.map(pin => 
+        pin._id === pinId ? { ...pin, reviews: pin.reviews.map(review => 
+          review._id === reviewId ? { ...review, text, rating } : review
+        )} : pin
+      ));
+    }
+  } catch (error) {
+    console.error('Ошибка при обновлении отзыва:', error.response?.data || error.message);
+  }
+};
+
+
+const hasUserReviewedPin = (pin, username) => {
+  return pin.reviews.some((review) => review.username === username);
+};
+
+
+
+// Функция для начала редактирования отзыва
+const startEditingReview = (pinId, review) => {
+  console.log('Начинаем редактирование отзыва', review);
+  setEditingReview({ ...review, pinId });
+  setNewReviewText(review.text);
+  setNewReviewRating(review.rating);
+  
+};
+
+/// pin DESC
+// Функция для начала редактирования описания пина создателем
+const startEditingPinReview = (pin) => {
+  setEditingReview({ ...pin, isEditingDesc: true });
+  setNewReviewText(pin.desc);
+  setNewReviewRating(pin.rating);
+};
+
+// Функция для обновления описания пина
+const handleUpdatePinReview = async (pinId) => {
+  if (!editingReview.isEditingDesc) {
+    console.error('The review is not in editing mode.');
+    return;
+  }
+  try {
+    const updatedReview = {
+      desc: newReviewText,
+      rating: newReviewRating,
+      userId: currentUser // вот здесь добавляем userId
+    };
+    console.log(updatedReview);
+
+    const res = await axios.put(`http://localhost:8800/api/pins/${pinId}/update`, updatedReview);
+
+    if (res.status === 200) {
+      setPins(prevPins => prevPins.map(pin => pin._id === pinId ? { ...pin, ...updatedReview } : pin));
+      setEditingReview(null);
+    }
+  } catch (error) {
+    console.error('Error updating the pin review:', error.response?.data || error.message);
+  }
+};
+
+
+/////////////////////////////////////////UPDATE//////////////////////////////////////////////////////////////////////////
 
 
 function AvgRating(pin){
