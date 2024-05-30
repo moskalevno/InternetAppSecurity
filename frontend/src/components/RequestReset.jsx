@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './requestReset.css'
-export default function RequestReset() {
+
+export default function RequestReset({ setShowRecover }) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
@@ -9,10 +10,8 @@ export default function RequestReset() {
     e.preventDefault();
     try {
       const response = await axios.post('/users/requestReset', { email });
-      // В случае успеха обновляем сообщение для пользователя
       setMessage('If an account with that email exists, we sent a link to reset your password.');
     } catch (error) {
-      // В случае ошибки также обновляем сообщение
       setMessage('There was an issue submitting your request. Please try again later.');
     }
   };
@@ -30,10 +29,8 @@ export default function RequestReset() {
         />
         <button type="submit">Send Reset Link</button>
       </form>
-      
       {message && <p>{message}</p>}
+      <button onClick={() => setShowRecover(false)}>Cancel</button>
     </div>
   );
 }
-
-//export default RequestReset;

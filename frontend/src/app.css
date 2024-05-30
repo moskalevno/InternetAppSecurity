@@ -190,3 +190,10 @@ margin-top: 0;
     height: 150px;
     
 }
+
+.visibilityPinButton{
+    top: 0;
+    left: 0;
+    margin-right: 10px;
+    background-color: rgb(97, 97, 191);
+}

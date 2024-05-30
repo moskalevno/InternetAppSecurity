@@ -1,38 +1,39 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route,Routes, Switch, useParams,useNavigate,Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from "react";
-import * as turf from '@turf/turf';
-import { lineString, bezierSpline, point, pointToLineDistance } from '@turf/turf';
-import {render} from 'react-dom';
-import Map, {Marker, Popup, Source, Layer} from 'react-map-gl';
-import axios from 'axios'
-import {Room, Star} from '@material-ui/icons';
-import {format} from 'timeago.js'
+import axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import './app.css'
+import './app.css';
 import Register from './components/Register';
-import Login from './components/Login'
+import Login from './components/Login';
 import RequestReset from './components/RequestReset';
 import ResetPassword from './components/ResetPassword';
 import Home from './components/Home';
 
+const MAPBOX_TOKEN = 'your_mapbox_token_here';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoibWFrczM1NDkiLCJhIjoiY2xmc3U2bXU4MDl2ejNqb2JzeTFpazV5aiJ9.hK8UcLIKZyNtJlpBj_V06g'; // Set your mapbox token here
+function App() {
+  const myStorage = window.localStorage;
+  const [currentUser, setCurrentUser] = useState(myStorage.getItem("user"));
+  const [showRecover, setShowRecover] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
-function App({ currentUser, handleLogout }) {
-
-  //////////////////TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST///////////TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST////////////////////////////////////////////////////
+  const handleLogout = () => {
+    myStorage.removeItem("user");
+    setCurrentUser(null);
+  };
 
   return (
     <div className='App'>
-        <Routes>
-  <Route path="/" element={<Home currentUser={currentUser} handleLogout={handleLogout} />} />
-  <Route path="/resetPassword" element={<ResetPassword />} />
-</Routes>
-        
-        
+      <Routes>
+        <Route path="/" element={<Home currentUser={currentUser} handleLogout={handleLogout} myStorage={myStorage} setCurrentUser={setCurrentUser} setShowRecover={setShowRecover} setShowLogin={setShowLogin} showLogin={showLogin} showRecover={showRecover} />} />
+        <Route path="/resetPassword" element={<ResetPassword />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login setCurrentUser={setCurrentUser} myStorage={myStorage} setShowRecover={setShowRecover} setShowLogin={setShowLogin} />} />
+        <Route path="/requestReset" element={<RequestReset />} />
+      </Routes>  
     </div>
-    )
-  
+  );
 }
-export default App
+
+export default App;

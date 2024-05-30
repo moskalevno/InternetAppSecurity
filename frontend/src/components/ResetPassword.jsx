@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useParams, useLocation } from 'react-router-dom'; 
+import { useParams, useLocation, useNavigate } from 'react-router-dom'; 
 import './resetPassword.css'
-import { useNavigate } from 'react-router-dom';
+
 
 
 
