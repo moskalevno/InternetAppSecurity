@@ -6,7 +6,7 @@ const userRoute = require("./routes/users")
 const pinRoute = require("./routes/pins")
 const verifyRoute = require("./routes/verify")
 const reviewRoute = require("./routes/reviews")
-const authMiddleware = require('./auth/authMiddleware');
+//const authMiddleware = require('./auth/authMiddleware');
 
 const app = express()
 

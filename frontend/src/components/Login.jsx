@@ -19,12 +19,17 @@ export default function Login({ setShowLogin, myStorage, setCurrentUser, setShow
 
     try {
       const res = await axios.post("/users/login", user);
-      myStorage.setItem("user", res.data.username);
-      setCurrentUser(res.data.username);
-      setShowLogin(false);
-      setShowRecover(false); // Сбрасываем состояние showRecover
-      setError(false);
-      navigate('/');
+      if (res.data.message === 'Verification code sent to your email') {
+        // Если требуется верификация, перенаправляем на страницу верификации
+        navigate(`/verify/${res.data.userId}`);
+      } else {
+        myStorage.setItem("user", res.data.username);
+        setCurrentUser(res.data.username);
+        setShowLogin(false);
+        setShowRecover(false); // Сбрасываем состояние showRecover
+        setError(false);
+        navigate('/');
+      }
     } catch (err) {
       setError(true);
       console.log(err);
@@ -46,9 +51,7 @@ export default function Login({ setShowLogin, myStorage, setCurrentUser, setShow
         <input type="password" placeholder="password" ref={passwordRef} />
         <button className="loginButton">Login</button>
         <button type="button" className="forgotPasswordButton" onClick={handleForgotPassword}>Forgot Password?</button>
-        {error &&
-          <span className="error">Something went wrong</span>
-        }
+        {error && <span className="error">Something went wrong</span>}
       </form>
       <Cancel className="loginCancel" onClick={() => setShowLogin(false)} />
     </div>

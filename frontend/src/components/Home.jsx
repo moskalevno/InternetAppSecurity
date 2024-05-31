@@ -62,10 +62,12 @@ function Home({ currentUser, handleLogout, myStorage, setCurrentUser, setShowRec
   const [countriesBordersGeoJSON, setCountriesBordersGeoJSON] = useState(null);
 
   useEffect(() => {
-    // Замените 'path/to/your/geojson.json' на путь к вашему GeoJSON файлу.
     fetch('/custom.geo.json')
       .then((response) => response.json())
-      .then((data) => setCountriesBordersGeoJSON(data))
+      .then((data) => {
+        console.log('GeoJSON data loaded:', data); // Лог данных GeoJSON
+        setCountriesBordersGeoJSON(data);
+      })
       .catch((error) => console.error('Error loading GeoJSON:', error));
   }, []);
 
@@ -1009,7 +1011,36 @@ const geocodeLocation = async (locationName) => {
         :
         (showLogin && <Login setShowRecover={setShowRecover} setShowLogin={setShowLogin} myStorage={myStorage} setCurrentUser={setCurrentUser}/>)
       }
+      {countriesBordersGeoJSON && (
+          <Source id="countries" type="geojson" data={countriesBordersGeoJSON}>
+            <Layer
+              id="countries-borders"
+              type="line"
+              paint={{
+                'line-color': '#0eabed', // Цвет линий границ
+                'line-width': 2 // Ширина линий границ
+              }}
+            />
+          </Source>
+        )}
 
+        {/* Отображение маршрута */}
+        {route && (
+          <Source id="route" type="geojson" data={route}>
+            <Layer
+              id="route"
+              type="line"
+              layout={{
+                'line-join': 'round',
+                'line-cap': 'round'
+              }}
+              paint={{
+                'line-color': '#61e740',
+                'line-width': 5
+              }}
+            />
+          </Source>
+        )}
       </Map>
     </div>
     );

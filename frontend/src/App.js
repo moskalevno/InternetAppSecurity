@@ -9,8 +9,9 @@ import Login from './components/Login';
 import RequestReset from './components/RequestReset';
 import ResetPassword from './components/ResetPassword';
 import Home from './components/Home';
+import Verify from './components/Verify';
 
-const MAPBOX_TOKEN = 'your_mapbox_token_here';
+
 
 function App() {
   const myStorage = window.localStorage;
@@ -27,10 +28,11 @@ function App() {
     <div className='App'>
       <Routes>
         <Route path="/" element={<Home currentUser={currentUser} handleLogout={handleLogout} myStorage={myStorage} setCurrentUser={setCurrentUser} setShowRecover={setShowRecover} setShowLogin={setShowLogin} showLogin={showLogin} showRecover={showRecover} />} />
-        <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login setCurrentUser={setCurrentUser} myStorage={myStorage} setShowRecover={setShowRecover} setShowLogin={setShowLogin} />} />
+        <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/requestReset" element={<RequestReset />} />
+        <Route path="/verify/:userId" element={<Verify />} />
       </Routes>  
     </div>
   );

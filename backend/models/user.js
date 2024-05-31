@@ -24,11 +24,14 @@ const userSchema = new mongoose.Schema({
         min: 6,
     },
 
-    phone:{
-        type: String,
-        unique: true
-        
+    verificationCodeEmail: { 
+        type: String 
     },
+    isVerified: { 
+        type: Boolean, 
+        default: false 
+    },
+
     verificationCode: {
         code: String,
         expiresAt: Date,
