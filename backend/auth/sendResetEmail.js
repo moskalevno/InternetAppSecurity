@@ -12,7 +12,7 @@ const sendResetEmail = (email, link) => {
     }
   });
 
-  // Определяем параметры письма
+  // параметры письма
   const mailOptions = {
     from: process.env.EMAIL, // адрес отправителя
     to: email, // адрес получателя

@@ -4,14 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './app.css';
-import Register from './components/Register';
-import Login from './components/Login';
-import RequestReset from './components/RequestReset';
-import ResetPassword from './components/ResetPassword';
+import Register from './components/Register/Register';
+import Login from './components/Login/Login';
+import RequestReset from './components/RequestReset/RequestReset';
+import ResetPassword from './components/ResetPassword/ResetPassword';
 import Home from './components/Home';
-import Verify from './components/Verify';
-
-
+import Verify from './components/Verify/Verify';
 
 function App() {
   const myStorage = window.localStorage;

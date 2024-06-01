@@ -55,10 +55,6 @@ form{
     margin-bottom: 20px;
 }
 
-
-
-
-
 input{
     border: none;
     border-bottom: 1px solid grey;
@@ -82,8 +78,6 @@ select{
     cursor: pointer;
 }
 
-
-
 .button{
     position: relative;
     border: none;
@@ -94,12 +88,9 @@ select{
 }
 
 .buttonRoute{
-    
     border-radius: 5px;
-    background-color: rgb(166, 113, 14);
+    background-color: rgb(19, 137, 191);
     margin-right: 10px;
-    
-
 }
 
 .ButtonPoints {
@@ -107,12 +98,20 @@ select{
 }
 
 .PointsRoute{
-    background-color: crimson;
+    background-color: rgb(36, 28, 196);
 }
 
 .countryRoute{
     margin-right: 10px;
     background-color: coral;
+}
+
+.ButtonIsideCity{
+    background-color: rgb(27, 161, 136);
+}
+
+.ButtonByCountry{
+    background-color: rgb(89, 212, 52);
 }
 
 .input-button{
@@ -128,15 +127,13 @@ select{
 .form-popup {
 position: absolute;
 display: block;
-top: 100%; /* Это заставляет его появляться прямо под родительской кнопкой */
+top: 100%; 
 left: 0;
-z-index: 10; /* Убедитесь, что всплывающее окно находится над другими элементами */
+z-index: 10; 
 margin-top: 0;
-/* Дополнительные стили для всплывающего окна */
 }
 
 .logout{
-    
     background-color: tomato;
 }
 
@@ -150,38 +147,36 @@ margin-top: 0;
 }
 
 .buttons, .buttonRoute .logout{
-
     position: absolute;
     top: 10px;
     right: 10px;
 }
-/* CSS */
+
 .button-container {
     position: relative;
-    display: inline-block; /* Если вы хотите, чтобы элементы были в линию */
-    margin-right: 10px; /* Опционально, добавляет отступ между кнопками */
-  }
-  
-  .custom-route-form {
-    position: absolute;
-    top: 100%; /* Поместить форму прямо под кнопкой */
-    left: 0;
-    z-index: 10; /* Убедитесь, что форма будет над другими элементами */
-    background: white; /* Опционально, можно задать фон */
-    padding: 10px; /* Опционально, можно добавить внутренние отступы */
-    border: 1px solid #ccc; /* Опционально, можно добавить границу */
-    border-radius: 4px; /* Опционально, можно скруглить углы */
-    width: 90%; /* Установить ширину формы */
-  }
-  
-  /* Это может потребоваться, если у вас есть другие кнопки в одной строке */
-  .buttons {
-    display: flex; /* Расположение кнопок в одной строке */
-    align-items: start; /* Выравнивание кнопок по верху */
-    flex-wrap: wrap; /* Перенос элементов на новую строку при нехватке места */
-  }
+    display: inline-block; 
+    margin-right: 10px; 
+}
 
-  .accumForm{
+.custom-route-form {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    z-index: 10; 
+    background: white; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    width: 90%; 
+}
+
+.buttons {
+    display: flex; 
+    align-items: start; 
+    flex-wrap: wrap; 
+}
+
+.accumForm{
     display: flex;
     flex-direction: column;
     gap: 20px;

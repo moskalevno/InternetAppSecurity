@@ -1,0 +1,44 @@
+.pin-list {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: 270px;
+    height: 70%;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+.sort-form{
+height: 80px;
+}
+.select-country{
+width: 250px;
+margin-bottom: 15px;
+}
+
+.pin-list form {
+display: flex;
+justify-content: space-between;
+margin-bottom: 10px;
+}
+
+.pin-list ul {
+list-style: none;
+padding: 0;
+}
+
+.pin-list li {
+padding: 5px 0;
+border-bottom: 1px solid #ccc;
+}
+
+.pin-list li:last-child {
+border-bottom: none;
+}
+
+.LayoutPin{
+    margin-left: 10px;
+    background-color: rgb(203, 33, 178);
+}

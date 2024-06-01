@@ -16,6 +16,7 @@ const reviewSchema = new mongoose.Schema({
     }
 
 },{timestamps: true})
+
 const pinSchema = new mongoose.Schema({
     username:{
         type: String,
@@ -45,7 +46,12 @@ const pinSchema = new mongoose.Schema({
     countryName: {
         type: String,
         required: true,
-      },
+    },
+
+    city: {
+        type: String,  
+        required: true,
+    },
 
     lat: {
         type: Number,
@@ -64,12 +70,3 @@ const pinSchema = new mongoose.Schema({
 )
 
 module.exports = mongoose.model("pin", pinSchema)
-
-
-
-
-
-
-
-
-
