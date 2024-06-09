@@ -5,7 +5,7 @@ import * as turf from '@turf/turf';
 import { lineString, bezierSpline} from '@turf/turf';
 import Map, {Marker, Popup, Source, Layer} from 'react-map-gl';
 import axios from 'axios'
-import {Room, Star} from '@material-ui/icons';
+import {Room, Star, MyLocation} from '@material-ui/icons';
 import {format} from 'timeago.js'
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '../app.css'
@@ -24,6 +24,7 @@ function Home({ currentUser, handleLogout, myStorage, setCurrentUser, setShowRec
   const [endCity, setEndCity] = useState('');
   const [endPlace, setEndPlace] = useState('');
   const [showCustomRouteForm1, setShowCustomRouteForm1] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   //////
   const [editingReview, setEditingReview] = useState(null);
   const [pins, setPins] = useState([]);
@@ -84,6 +85,48 @@ function Home({ currentUser, handleLogout, myStorage, setCurrentUser, setShowRec
     getPins();
   }, [])
 
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const closeMenu = () => setMenuOpen(false);
+
+  const [burgerMenuForms, setBurgerMenuForms] = useState({
+    betweenTwoPoints: false,
+    byCountry: false,
+    inCity: false,
+  });
+  
+  const toggleBurgerMenuForm = (formName) => {
+    setBurgerMenuForms((prevState) => ({
+      ...prevState,
+      [formName]: !prevState[formName],
+    }));
+  };
+
+  const handleToggleBurgerMenuForm = (formName) => {
+    setBurgerMenuForms((prevState) => {
+      const newState = { ...prevState, [formName]: !prevState[formName] };
+
+      if (newState[formName]) {
+        setTimeout(() => {
+          const form = document.querySelector(`.${formName}-form`);
+          const button = document.querySelector(`.button.ButtonPoints.${formName}-button`);
+          if (form && button) {
+            const buttonRect = button.getBoundingClientRect();
+            form.style.top = `${buttonRect.bottom + window.scrollY}px`;
+            form.style.left = `${buttonRect.left + window.scrollX}px`;
+            form.style.display = 'block';
+          }
+        }, 0);
+      } else {
+        const form = document.querySelector(`.${formName}-form`);
+        if (form) {
+          form.style.display = 'none';
+        }
+      }
+
+      return newState;
+    });
+  };
+
   useEffect(() => {
     if (showRecover) {
       console.log('Show Recover Component');
@@ -118,6 +161,15 @@ function Home({ currentUser, handleLogout, myStorage, setCurrentUser, setShowRec
       lng:lng,
     })
   }
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const [userLocation, setUserLocation] = useState(null); // Состояние для хранения текущего местоположения
+
+  
 
  // LAYOUT//////////////////
  const [sortOption, setSortOption] = useState('');
@@ -829,6 +881,28 @@ function Home({ currentUser, handleLogout, myStorage, setCurrentUser, setShowRec
       return null;
     }
   };
+
+  const handleShowLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+          setViewport((prevViewport) => ({
+            ...prevViewport,
+            latitude,
+            longitude,
+            zoom: prevViewport.zoom, // Сохранить текущий масштаб
+          }));
+        },
+        (error) => {
+          console.error("Error retrieving location:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  };
   ////////////////////////////BUTTON FOR A TO B ROUTE//////////////////////////////////////////////////////////////////////////////////////////////////////////
 const [showPopup, setShowPopup] = useState(true);
 
@@ -858,6 +932,12 @@ return (
               onClick={() => handleMarkerClick(p._id, p.lat, p.long, p.countryName)}
             />
           </Marker>
+
+          {userLocation && (
+          <Marker latitude={userLocation.latitude} longitude={userLocation.longitude} anchor="bottom" >
+            <MyLocation style={{ fontSize: viewport.zoom * 8, color: "deeppink", cursor: "pointer" }} />
+          </Marker>
+        )}
 
           {p._id === currentPlaceId &&
             <Popup
@@ -1036,7 +1116,7 @@ return (
 
       <div className="buttons">
         <div className="button-container">
-          <button className="button ButtonPoints" onClick={handleShowCustomRouteForm}>
+          <button className="button ButtonPoints nmr" onClick={handleShowCustomRouteForm}>
             Build Route Between Two Points
           </button>
 
@@ -1164,7 +1244,304 @@ return (
               <button className="button register" onClick={() => navigate('/register')}>Register</button>
             </>
           )}
+
+        <button className="button buttonRoute" onClick={handleShowLocation}>
+            Show My Location
+          </button>
       </div>
+
+      <button className={`burger-menu ${menuOpen ? 'open' : ''}`} onClick={toggleMenu}>
+        <div></div>
+        <div></div>
+        <div></div>
+      </button>
+
+      <div className={`menu ${menuOpen ? 'open' : ''}`}>
+        <button className="button visibilityPinButton" onClick={() => { setShowPins(!showPins); closeMenu(); }}>
+          {showPins ? "Hide Pins" : "Show Pins"}
+        </button>
+
+        <button className="button buttonRoute" onClick={() => { buildRoute(); closeMenu(); }}>
+          Build Top Rated Route
+        </button>
+
+        <div className="button-container">
+          <button className="button ButtonPoints" onClick={() => { toggleBurgerMenuForm('betweenTwoPoints'); }}>
+            Build Route Between Two Points
+          </button>
+          {burgerMenuForms.betweenTwoPoints && (
+            <form className="form-popup" onSubmit={handleCustomRouteSubmit}>
+              <input
+                type="text"
+                placeholder="Enter start point (e.g., 'Cairo, Egypt')"
+                value={startPoint}
+                onChange={(e) => setStartPoint(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter end point (e.g., 'Tokyo, Japan')"
+                value={endPoint}
+                onChange={(e) => setEndPoint(e.target.value)}
+              />
+              <button className='button PointsRoute' type="submit">Build Route</button>
+            </form>
+          )}
+        </div>
+
+        <div className="button-container">
+          <button className="button ButtonPoints" onClick={() => { toggleBurgerMenuForm('byCountry'); }}>
+            Build Route By Country
+          </button>
+          {burgerMenuForms.byCountry && (
+            <form className="form-popup" onSubmit={handleCountrySubmit}>
+              <input
+                type="text"
+                value={countryInput}
+                onChange={(e) => setCountryInput(e.target.value)}
+                placeholder="Enter country name"
+              />
+              <button className="button countryRoute input-button" type="submit">Build Route</button>
+            </form>
+          )}
+        </div>
+
+        <button className="button countryRoute" onClick={() => {setIsRouteMode(!isRouteMode); closeMenu();}}>
+            {isRouteMode ? 'Cancel Route' : 'Build Custom Route'}
+          </button>
+
+        <div className="button-container">
+          <button className="button ButtonPoints" onClick={() => { toggleBurgerMenuForm('inCity'); }}>
+            Build Route in City
+          </button>
+          {burgerMenuForms.inCity && (
+            <form className="form-popup" onSubmit={handleCityRouteSubmit}>
+              <input
+                type="text"
+                placeholder="Enter country name (e.g., 'USA')"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter city name (e.g., 'New York')"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+              <button className='button PointsRoute' type="submit">Build Route</button>
+            </form>
+          )}
+        </div>
+
+        <div className="button-container">
+          <button className="button ButtonPoints ButtonIsideCity" onClick={handleShowCustomRouteForm1}>
+            Build Route Inside City
+          </button>
+
+          {showCustomRouteForm1 && (
+            <form className="form-popup" onSubmit={handleCustomRouteSubmit1}>
+              <input
+                type="text"
+                placeholder="Enter start city (e.g., 'Kettering')"
+                value={startCity}
+                onChange={(e) => setStartCity(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter start place (e.g., 'Prezzo')"
+                value={startPlace}
+                onChange={(e) => setStartPlace(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter end city (e.g., 'Kettering')"
+                value={endCity}
+                onChange={(e) => setEndCity(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter end place (e.g., 'Savers')"
+                value={endPlace}
+                onChange={(e) => setEndPlace(e.target.value)}
+              />
+              <button className='button PointsRoute' type="submit">Build Route</button>
+            </form>
+          )}
+        </div>
+
+        <button className="button ButtonPoints LayoutPin" onClick={() => { setShowPinList(!showPinList); closeMenu(); }}>
+          {showPinList ? "Hide Pin List" : "Show Pin List"}
+        </button>
+
+        {currentUser
+          ? (<button className="button logout" onClick={() => { handleLogout(); closeMenu(); }}>LogOut</button>)
+          :
+          (
+            <>
+              <button className="button login" onClick={() => { navigate('/login'); closeMenu(); }}>LogIn</button>
+              <button className="button register" onClick={() => { navigate('/register'); closeMenu(); }}>Register</button>
+            </>
+          )}
+
+          <button className="button buttonRoute" onClick={handleShowLocation}>
+            Show My Location
+          </button>
+      </div>
+
+
+      {/* Выпадающее меню */}
+      <div className='dropdown-wrapper'>
+        <div className="dropdown-container">
+          <button className="button dropdown-button" onClick={toggleDropdown}>
+            Menu
+          </button>
+          {dropdownOpen && (
+            <div className="dropdown-menu">
+                          <button className="button visibilityPinButton" onClick={() => { setShowPins(!showPins); closeMenu(); }}>
+            {showPins ? "Hide Pins" : "Show Pins"}
+          </button>
+
+          <div className="button-container">
+            <button className="button ButtonPoints nmr" onClick={handleShowCustomRouteForm}>
+              Build Route Between Two Points
+            </button>
+
+
+
+            {showCustomRouteForm && (
+              <form className="form-popup" onSubmit={handleCustomRouteSubmit}>
+                <input
+                  type="text"
+                  placeholder="Enter start point (e.g., 'Cairo, Egypt')"
+                  value={startPoint}
+                  onChange={(e) => setStartPoint(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter end point (e.g., 'Tokyo, Japan')"
+                  value={endPoint}
+                  onChange={(e) => setEndPoint(e.target.value)}
+                />
+                <button className='button PointsRoute' type="submit">Build Route</button>
+              </form>
+            )}
+          </div>
+
+          <button className="button ButtonPoints LayoutPin" onClick={() => setShowPinList(!showPinList)}>
+              {showPinList ? "Hide Pin List" : "Show Pin List"}
+            </button>
+
+              <button className="button buttonRoute" onClick={buildRoute}>
+                Build Top Rated Route
+              </button>
+
+
+
+              <div className="button-container">
+            <button className="button buttonRoute ButtonPoints ButtonIsideCity" onClick={handleShowCustomRouteForm1}>
+              Build Route Inside City
+            </button>
+
+            {showCustomRouteForm1 && (
+              <form className="form-popup" onSubmit={handleCustomRouteSubmit1}>
+                <input
+                  type="text"
+                  placeholder="Enter start city (e.g., 'Kettering')"
+                  value={startCity}
+                  onChange={(e) => setStartCity(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter start place (e.g., 'Prezzo')"
+                  value={startPlace}
+                  onChange={(e) => setStartPlace(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter end city (e.g., 'Kettering')"
+                  value={endCity}
+                  onChange={(e) => setEndCity(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter end place (e.g., 'Savers')"
+                  value={endPlace}
+                  onChange={(e) => setEndPlace(e.target.value)}
+                />
+                <button className='button PointsRoute' type="submit">Build Route</button>
+              </form>
+            )}
+          </div>
+
+          <div className="button-container">
+            <button className="button ButtonPoints buttonRoute" onClick={() => { toggleBurgerMenuForm('inCity'); }}>
+              Build Route in City
+            </button>
+            {burgerMenuForms.inCity && (
+              <form className="form-popup" onSubmit={handleCityRouteSubmit}>
+                <input
+                  type="text"
+                  placeholder="Enter country name (e.g., 'USA')"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter city name (e.g., 'New York')"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+                <button className='button PointsRoute' type="submit">Build Route</button>
+              </form>
+            )}
+          </div>
+
+          <button className="button countryRoute" onClick={() => setIsRouteMode(!isRouteMode)}>
+                {isRouteMode ? 'Cancel Route' : 'Build Custom Route'}
+              </button>
+
+              <button className="button countryRoute ButtonByCountry" onClick={handleShowCountryInput}>
+                Build Route By Country
+              </button>
+
+              {isCountryInputVisible && (
+                <form className="form-popup" onSubmit={handleCountrySubmit}>
+                  <input className='popup-input'
+                    type="text"
+                    value={countryInput}
+                    onChange={(e) => setCountryInput(e.target.value)}
+                    placeholder="Enter country name"
+                  />
+                  <button className="button countryRoute input-button" type="submit">Build Route</button>
+                </form>
+              )}
+                        <button className="button ButtonPoints LayoutPin" onClick={() => {setShowPinList(!showPinList)}}>
+              {showPinList ? "Hide Pin List" : "Show Pin List"}
+            </button>
+
+            <button className="button buttonRoute" onClick={handleShowLocation}>
+            Show My Location
+          </button>
+            </div>
+          )}
+
+
+            
+        </div>
+
+        <div className='dropdown-buttons'>
+            {currentUser
+                      ? (<button className="button logout" onClick={() => { handleLogout(); closeMenu(); }}>LogOut</button>)
+                      :
+                      (
+                        <>
+                          <button className="button login" onClick={() => { navigate('/login'); closeMenu(); }}>LogIn</button>
+                          <button className="button register" onClick={() => { navigate('/register'); closeMenu(); }}>Register</button>
+                        </>
+                      )}
+            </div>
+      </div>
+
+
 
       {showPinList && (
         <div className="pin-list">

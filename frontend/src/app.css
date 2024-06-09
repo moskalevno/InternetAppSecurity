@@ -1,194 +1,547 @@
-.card{
+.dropdown-buttons{
+    display: none;
+}
+  
+  .card {
     width: 100%;
     max-height: 300px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-}
-
-label{
+  }
+  
+  label {
     width: max-content;
     margin: 3px 0;
     color: tomato;
     font-size: 13px;
     border-bottom: .5px solid tomato;
-}
-
-.desc{
+  }
+  
+  .desc {
     font-size: 14px;
-
-}
-.star{
+  }
+  
+  .star {
     background-color: black;
     color: gold;
-}
-
-.username{
+  }
+  
+  .username {
     font-size: 14px;
-
-}
-
-.information{
+  }
+  
+  .information {
     font-size: 12px;
-}
-
-form{
+  }
+  
+  form {
     width: 250px;
     height: 250px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-}
-
-.reviewForm{
-    
+  }
+  
+  .reviewForm {
     font-size: 16px;
-}
-
-.addReview{
-    
+  }
+  
+  .addReview {
     margin-top: 20px;
-}
-
-.buttonReview{
+  }
+  
+  .buttonReview {
     margin-bottom: 20px;
-}
-
-input{
+  }
+  
+  input {
     border: none;
     border-bottom: 1px solid grey;
-}
-
-input::placeholder, textarea::placeholder{
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
     font-size: 12px;
     color: rgb(174, 174, 174);
-}
-
-select{
+  }
+  
+  select {
     margin-bottom: 7px;
-}
-
-.submitButton{
+  }
+  
+  .submitButton {
     border: none;
     padding: 5px;
     border-radius: 5px;
     color: white;
     background-color: tomato;
     cursor: pointer;
-}
-
-.button{
+  }
+  
+  .button {
     position: relative;
     border: none;
     padding: 5px;
     border-radius: 5px;
+    margin-right: 10px;
     color: white;
     cursor: pointer;
-}
-
-.buttonRoute{
+  }
+  
+  .buttonRoute {
     border-radius: 5px;
     background-color: rgb(19, 137, 191);
-    margin-right: 10px;
-}
-
-.ButtonPoints {
+    
+  }
+  
+  .ButtonPoints {
     background-color: crimson;
-}
-
-.PointsRoute{
+  }
+  
+  .PointsRoute {
     background-color: rgb(36, 28, 196);
-}
-
-.countryRoute{
-    margin-right: 10px;
+  }
+  
+  .countryRoute {
+    
     background-color: coral;
-}
+  }
+  
+  .ButtonIsideCity {
 
-.ButtonIsideCity{
     background-color: rgb(27, 161, 136);
-}
-
-.ButtonByCountry{
+  }
+  
+  .ButtonByCountry {
     background-color: rgb(89, 212, 52);
-}
-
-.input-button{
+  }
+  
+  .input-button {
     width: 64%;
-}
+  }
 
-.popup-input{
+  .nmr{
+    margin-right: 0;
+  }
+  
+  .popup-input {
     border-radius: 5px;
     width: 63%;
     height: 30px;
-}
-
-.form-popup {
-position: absolute;
-display: block;
-top: 100%; 
-left: 0;
-z-index: 10; 
-margin-top: 0;
-}
-
-.logout{
+  }
+  
+  .form-popup {
+    position: relative;
+    max-width: 200px;
+    border: 2px solid black;
+    background-color: white;
+    padding: 20px;
+    z-index: 1000;
+    margin-top: 10px;
+  }
+  
+  .logout {
     background-color: tomato;
-}
-
-.login{
-    margin-right: 10px;
+  }
+  
+  .login {
+    
     background-color: teal;
-}
-
-.register{
+  }
+  
+  .register {
     background-color: slateblue;
-}
-
-.buttons, .buttonRoute .logout{
+  }
+  
+  .buttons,
+  .buttonRoute .logout {
     position: absolute;
     top: 10px;
     right: 10px;
-}
 
-.button-container {
+  }
+  
+  .button-container {
+    /* display: flex;
+    flex-direction: column;  */
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
     position: relative;
-    display: inline-block; 
-    margin-right: 10px; 
-}
-
-.custom-route-form {
+  }
+  
+  .custom-route-form {
     position: absolute;
-    top: 100%; 
-    left: 0;
-    z-index: 10; 
-    background: white; 
-    padding: 10px; 
-    border: 1px solid #ccc; 
-    border-radius: 4px; 
-    width: 90%; 
-}
-
-.buttons {
-    display: flex; 
-    align-items: start; 
-    flex-wrap: wrap; 
-}
-
-.accumForm{
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 200px;
+    border: 2px solid black;
+    background-color: white;
+    padding: 20px;
+    z-index: 1000;
+    margin-top: 10px;
+  }
+  
+  .buttons {
+    display: flex;
+    align-items: start;
+    flex-wrap: wrap;
+  }
+  
+  .accumForm {
     display: flex;
     flex-direction: column;
     gap: 20px;
     margin-top: 20px;
     width: 250px;
     height: 150px;
-    
-}
-
-.visibilityPinButton{
+  }
+  
+  .visibilityPinButton {
     top: 0;
     left: 0;
-    margin-right: 10px;
+    
     background-color: rgb(97, 97, 191);
-}
+  }
+  
+  /* Бургер-меню */
+  .burger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+  }
+  
+  .burger-menu div {
+    width: 30px;
+    height: 2px;
+    background: #333;
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+  }
+  
+  .burger-menu.open div:nth-child(1) {
+    transform: rotate(45deg);
+  }
+  
+  .burger-menu.open div:nth-child(2) {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  
+  .burger-menu.open div:nth-child(3) {
+    transform: rotate(-45deg);
+  }
+  
+  /* Меню */
+  .menu {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    background: #fff;
+    padding: 50px;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    z-index: 5;
+    overflow-y: auto;
+  }
+  
+  .menu.open {
+    transform: translateX(0);
+  }
+  
+  .menu a {
+    font-size: 24px;
+    text-transform: uppercase;
+    padding: 20px 0;
+    letter-spacing: 0.2rem;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s linear;
+  }
+  
+  .menu a:hover {
+    color: #343078;
+  }
+
+
+  
+  .menu .button-container {
+    margin-bottom: 20px;
+  }
+  
+
+
+  @media (max-width: 480px) {
+    .custom-route-form,
+    .form-popup {
+      position: relative;
+      max-width: 200px;
+      border: 2px solid black;
+      background-color: white;
+      padding: 20px;
+      z-index: 1000;
+      margin-top: 10px;
+      left: 25%; /* Added to move the form to the right */
+    }
+  }
+  
+  
+  /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+
+  .dropdown-container {
+    position: relative;
+    display: none; /* По умолчанию скрыто, покажем при 992px и ниже */
+  }
+  
+  .dropdown-button {
+    background-color: coral;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    /* position: absolute; */
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    padding: 10px;
+  }
+  
+  .dropdown-menu .button {
+    margin: 5px 0;
+  }
+
+  @media (max-width: 992px) {
+    .buttons {
+      display: none;
+    }
+
+    .dropdown-wrapper{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .dropdown-buttons{
+        display: flex;
+        width: 150px;
+        height: 30px;
+    }
+
+    .button-container{
+        margin-bottom: 0;
+    }
+
+    .dropdown-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 500px;
+    }
+    .button{
+        width: 100%;
+        border-radius: 8px;
+    }
+
+    .form-popup{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding-right: 10px;
+        height: 100px;
+        width: 167px;
+    }
+    .popup-input{
+        width: 160px;
+    }
+    .input-button{
+        width: 160px;
+    }
+
+    .dropdown-button{
+        width: 65px;
+        height: 30px;
+        padding: 0;
+        border-radius: 8px;
+    }
+  }
+
+
+  @media (max-width: 768px) {
+    .dropdown-buttons{
+        display: none;
+    }
+
+    .menu .custom-route-form,
+    .menu .form-popup {
+      display: flex;
+      flex-direction: column;
+      width: 90%;
+      margin-top: 10px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .custom-route-form,
+    .form-popup {
+      position: relative;
+      max-width: 200px;
+      border: 2px solid black;
+      background-color: white;
+      padding: 20px;
+      z-index: 1000;
+      margin-top: 10px;
+      left: 35%; /* Added to move the form to the right */
+    }
+    
+    .menu .custom-route-form,
+    .menu .form-popup {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .menu .custom-route-form,
+    .menu .form-popup {
+      display: flex;
+      flex-direction: column;
+      width: 90%;
+      margin-top: 10px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .custom-route-form,
+    .form-popup {
+      position: relative;
+      max-width: 200px;
+      border: 2px solid black;
+      background-color: white;
+      padding: 20px;
+      z-index: 1000;
+      margin-top: 10px;
+      left: 35%; /* Added to move the form to the right */
+    }
+    
+    .menu .custom-route-form,
+    .menu .form-popup {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    
+    .menu .button-container {
+      margin-bottom: 20px;
+    }
+
+    .button-container{
+        display: flex; 
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 10px;
+        position: relative;
+    }
+
+    .buttons {
+      display: none;
+    }
+  
+    .button {
+      width: 150px;
+      margin: 5px 0;
+    }
+  
+    .pin-list {
+      width: 90%;
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 80px;
+    }
+  
+    .burger-menu {
+      display: flex;
+    }
+  
+    .menu {
+      display: flex;
+    }
+  
+    .custom-route-form,
+    .form-popup {
+      display: flex;
+      width: 90%;
+      height: auto;
+    }
+  
+    .button-container {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  
+    .form-popup input,
+    .custom-route-form input {
+      width: 80%;
+      margin: 5px auto;
+    }
+  
+    .form-popup button,
+    .custom-route-form button {
+      width: 50%;
+      margin: 10px auto;
+    }
+
+    .dropdown-menu{
+        display: none;
+        
+    }
+
+    .dropdown-container {
+        
+        display: none;
+      }
+
+      .dropdown-button{
+        display: none;
+      }
+  }

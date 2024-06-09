@@ -39,6 +39,13 @@ border-bottom: none;
 }
 
 .LayoutPin{
-    margin-left: 10px;
     background-color: rgb(203, 33, 178);
+}
+
+@media (max-width: 768px) {
+    .pin-list{
+        top: 60px;
+        left: 165px;
+        height: 40%;
+    }
 }
