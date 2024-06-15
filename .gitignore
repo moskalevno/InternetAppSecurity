@@ -1,0 +1,11 @@
+# Игнорировать весь каталог node_modules
+node_modules/
+
+# Игнорировать конкретные файлы в node_modules
+frontend/node_modules/.cache/default-development/64.pack
+frontend/node_modules/.cache/default-development/0.pack
+frontend/node_modules/.cache/default-development/36.pack
+frontend/node_modules/.cache/default-development/61.pack
+frontend/node_modules/.cache/default-development/6.pack
+
+# Если нужно игнорировать другие файлы или каталоги, добавьте их здесь
